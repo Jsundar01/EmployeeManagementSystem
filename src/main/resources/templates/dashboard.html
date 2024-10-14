@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <!-- Replace with actual path if using Thymeleaf -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<header class="header fixed-header">
+    <nav class="navbar">
+        <div class="logo">
+            <!-- Replace with actual image path if using Thymeleaf -->
+            <img th:src="@{/images/cognizant.png}" alt="Cognizant Logo">
+        </div>
+        <ul class="nav-links">
+            <li><a href="#top">Home</a></li>
+            <li><a href="#">Product</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Resources</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Contact Us</a></li>
+        </ul>
+        <li><a href="#" class="logout-btn">Logout</a></li>
+    </nav>
+</header>
+
+<main class="dashboard-section">
+    <h1>Employee Dashboard</h1>
+    <div class="employee-table">
+        <table id="employeeTable">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Data will be dynamically populated here -->
+            </tbody>
+        </table>
+
+        <div class="insert-btn-container">
+            <a href="#" class="insert-btn" onclick="openInsertForm()">Insert Employee</a>
+        </div>
+    </div>
+</main>
+
+
+<div class="popup-form" id="popupForm">
+    <form id="employeeForm">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="empName">Name</label>
+                <input type="text" id="empName" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empDepartment">Department</label>
+                <select id="empDepartment" name="department" required>
+                    <option value="Finance">Finance</option>
+                    <option value="HR">HR</option>
+                    <option value="IT">IT</option>
+                    <!-- Add more departments as needed -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="empEmail">Email</label>
+                <input type="email" id="empEmail" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empPhone">Phone</label>
+                <input type="text" id="empPhone" name="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empDesignation">Designation</label>
+                <input type="text" id="empDesignation" name="designation" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empSalary">Salary</label>
+                <input type="number" id="empSalary" name="salary" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empLocation">Location</label>
+                <input type="text" id="empLocation" name="location" required>
+            </div>
+
+            <!-- New Address Fields -->
+            <h3 style="grid-column: span 2;">Address Information</h3>
+
+            <div class="form-group">
+                <label for="empStreet">Street</label>
+                <input type="text" id="empStreet" name="street" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empCity">City</label>
+                <input type="text" id="empCity" name="city" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empState">State</label>
+                <input type="text" id="empState" name="state" required>
+            </div>
+
+            <div class="form-group">
+                <label for="empPincode">Pincode</label>
+                <input type="text" id="empPincode" name="pincode" required>
+            </div>
+        </div>
+        <button type="submit" class="form-btn">Save</button>
+    </form>
+</div>
+
+
+
+<footer class="footer">
+    <p>&copy; 2024 Cognizant. All rights reserved.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    let employeeData = []; // Global variable to store employee data
+    let currentEmployeeId = null; // Variable to store current employee id for updating
+
+    async function fetchEmployeeData() {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            window.location.href = '/'; // Redirect to home page if no token
+            return;
+        }
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/employee', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok) {
+                employeeData = await response.json(); // Save employee data globally
+                populateEmployeeTable(employeeData);
+            } else {
+                console.error('Failed to fetch employee data:', response.status);
+                if (response.status === 401) {
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/'; // Redirect to home page
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function populateEmployeeTable(employeeData) {
+        const tableBody = document.getElementById('employeeTable').querySelector('tbody');
+        tableBody.innerHTML = ''; // Clear existing data
+
+        employeeData.forEach(employee => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${employee.id}</td>
+                <td>${employee.name}</td>
+                <td>${employee.department.name}</td>
+                <td>
+                    <button class="action-btn" onclick="openUpdateForm(${employee.id})">Update</button>
+                    <button class="action-btn" onclick="deleteEmployee(${employee.id})">Delete</button>
+                    <button class="action-btn" onclick="reportEmployee(${employee.id})">Report</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function openInsertForm() {
+        currentEmployeeId = null;
+        document.getElementById('employeeForm').reset();
+        document.getElementById('popupForm').style.display = 'block';
+    }
+
+    function openUpdateForm(id) {
+        const employee = employeeData.find(emp => emp.id === id);
+        if (employee) {
+            currentEmployeeId = id;
+            document.getElementById('empName').value = employee.name;
+            document.getElementById('empDepartment').value = employee.department.name;
+            document.getElementById('empEmail').value = employee.email;
+            document.getElementById('empPhone').value = employee.phone;
+            document.getElementById('empDesignation').value = employee.designation;
+            document.getElementById('empSalary').value = employee.salary;
+            document.getElementById('empLocation').value = employee.location;
+
+            // Set address fields
+            document.getElementById('empStreet').value = employee.address.street;
+            document.getElementById('empCity').value = employee.address.city;
+            document.getElementById('empState').value = employee.address.state;
+            document.getElementById('empPincode').value = employee.address.pincode;
+
+            document.getElementById('popupForm').style.display = 'block';
+        }
+    }
+
+
+    async function deleteEmployee(id) {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            alert('Authentication error. Please log in again.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete this employee?')) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/v1/employee/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Employee deleted successfully!');
+                    fetchEmployeeData(); // Refresh the employee table
+                } else {
+                    alert('Error occurred while deleting employee');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete employee');
+            }
+        }
+    }
+
+
+    function reportEmployee(id) {
+        const employee = employeeData.find(emp => emp.id === id);
+
+        if (!employee) {
+            alert('Employee not found!');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Employee Report', 20, 20);
+        doc.setFontSize(12);
+        doc.text(`ID: ${employee.id}`, 20, 40);
+        doc.text(`Name: ${employee.name}`, 20, 50);
+        doc.text(`Department: ${employee.department.name}`, 20, 60);
+        doc.text(`Email: ${employee.email}`, 20, 70);
+        doc.text(`Phone: ${employee.phone}`, 20, 80);
+        doc.text(`Designation: ${employee.designation}`, 20, 90);
+        doc.text(`Salary: ${employee.salary}`, 20, 100);
+        doc.text(`Location: ${employee.location}`, 20, 110);
+        doc.text(`Address: ${employee.address.street}, ${employee.address.city}, ${employee.address.state} ${employee.address.pincode}`, 20, 120);
+
+        doc.save(`Employee_${employee.name}_Report.pdf`);
+    }
+
+    document.getElementById('employeeForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Prevent form default submission behavior
+
+        // Get the form data
+        const formData = new FormData(this);
+        const employeeData = Object.fromEntries(formData);
+
+        // Add department object
+        employeeData.department = {
+            name: employeeData.department
+        };
+
+        // Add address object
+        employeeData.address = {
+            street: employeeData.street,
+            city: employeeData.city,
+            state: employeeData.state,
+            pincode: employeeData.pincode
+        };
+
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            alert('Authentication error. Please log in again.');
+            return;
+        }
+
+        try {
+            // Determine whether to insert (POST) or update (PUT)
+            const method = currentEmployeeId ? 'PUT' : 'POST';
+            const url = currentEmployeeId
+                ? `http://localhost:8080/api/v1/employee/${currentEmployeeId}`
+                : `http://localhost:8080/api/v1/employee`;
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(employeeData)
+            });
+
+            if (response.ok) {
+                alert(currentEmployeeId ? 'Employee updated successfully!' : 'Employee inserted successfully!');
+                await fetchEmployeeData(); // Refresh employee table
+                document.getElementById('popupForm').style.display = 'none'; // Close form
+            } else {
+                alert('Error occurred while saving employee data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to save employee data');
+        }
+    });
+
+
+    // Logout Function
+    function logout() {
+        localStorage.removeItem('jwtToken');
+        window.location.href = '/';
+    }
+
+    document.querySelector('.logout-btn').addEventListener('click', logout);
+
+    window.onload = fetchEmployeeData;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognizant Employee Data Management System</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+</head>
+
+
+<body>
+<a id="top"></a>
+<header class="header">
+    <nav class="navbar">
+        <div class="logo">
+            <img th:src="@{/images/cognizant.png}" alt="Cognizant Logo">
+        </div>
+        <ul class="nav-links">
+            <li><a href="#top">Home</a></li>
+            <li><a href="#">Product</a></li>
+            <li><a href="#why-us">About Us</a></li>
+            <li><a href="#">Resources</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><button class="login-btn">Sign In</button></li>
+        </ul>
+    </nav>
+</header>
+
+
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>Employee Data Management System (EDMS)</h1>
+        <p>Eliminate your administrative burden by automating the employee lifecycle and providing outstanding experience from hire to retire.</p>
+        <br>
+        <br>
+        <a href="#" class="demo-btn">Get a Personalized Demo</a>
+    </div>
+    <div class="hero-image">
+        <img src="https://www.worknice.com/wp-content/uploads/2021/07/35_Know-whos-who-e1626152718967.png" alt="Employee Management Illustration">
+    </div>
+</section>
+
+<section id="why-us" class="why-us-section" th:style="background">
+    <div class="container">
+        <h2>Why Choose Our EDMS?</h2>
+        <br>
+        <div class="card">
+            <img th:src="@{/images/edms.jpg}" alt="About Us" class="card-image"> <!-- Replace with your desired image URL -->
+            <div class="card-content">
+                <h3>About Us</h3>
+                <p>The Employee Data Management System (EDMS) is a streamlined solution designed to handle the essential task of managing employee records within an organization. The system centralizes employee data, such as personal information, job roles, contact details, department, and work history. This system will provide an intuitive user interface for HR staff to add, update, and retrieve employee information.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<footer class="footer">
+    <p>&copy; 2024 Cognizant. All rights reserved.</p>
+</footer>
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Sign In</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+    </div>
+</div>
+
+
+<script th:src="@{/js/scripts.js}">
+</script>
+</body>
+</html>
